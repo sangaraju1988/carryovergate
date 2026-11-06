@@ -1,0 +1,42 @@
+{
+ "seed": 20261106,
+ "per_env": 10,
+ "cases": {
+  "devops": [
+   "A1",
+   "A2",
+   "A3",
+   "CP2",
+   "CS6",
+   "CT1",
+   "DL2",
+   "DL4",
+   "M1",
+   "M2"
+  ],
+  "marketplace": [
+   "CM1",
+   "EX3",
+   "FI1",
+   "FI2",
+   "FI4",
+   "HO1",
+   "OM5",
+   "OM6",
+   "PI5",
+   "TM3"
+  ],
+  "productivity": [
+   "CM1",
+   "CM3",
+   "DC2",
+   "E1",
+   "E3",
+   "EX1",
+   "M1",
+   "M3",
+   "MSI3",
+   "PE3"
+  ]
+ }
+}

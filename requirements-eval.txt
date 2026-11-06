@@ -1,0 +1,8 @@
+# The gate, harness and tests are stdlib-only (Python >= 3.11).
+# The benchmark adapter needs the Task-Tampering benchmark installed as a
+# separate checkout (CC BY-NC 4.0, not vendored here):
+#   git clone https://github.com/amazon-science/task-tampering-prompt-injection ../task-tampering-prompt-injection
+#   pip install -e ../task-tampering-prompt-injection
+# plus these pins, which its pinned inspect_ai (ee0dfdef8) / mcp (1.12.3) need:
+openai>=2,<3
+pydantic>=2.12,<2.13

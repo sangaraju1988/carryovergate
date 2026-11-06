@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "carryovergate: a derivation-authority re-fire gate for LLM agents"
+version: 0.1.0
+date-released: 2026-11-06
+license: Apache-2.0
+repository-code: "https://github.com/sangaraju1988/carryovergate"
+authors:
+  - family-names: Sangaraju
+    given-names: Venkata M
