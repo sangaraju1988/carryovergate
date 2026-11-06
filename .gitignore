@@ -4,3 +4,4 @@ __pycache__/
 .pytest_cache/
 runs/*/harness_state/
 pib_results/
+.DS_Store
