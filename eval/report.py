@@ -253,6 +253,8 @@ def write_report(run: Path):
     L.append(f"- Benchmark: Task-Tampering @ `{meta.get('benchmark_commit')}`, base defense `{meta.get('base_defense')}`, variant `original` (compound) per case, plus a no-injection run per case")
     L.append(f"- Pilot cases (seed {meta.get('case_seed')}): {json.dumps(meta.get('cases'))}")
     L.append(f"- Synthetic harness: {meta.get('harness_rounds')} rounds per scenario, agents {meta.get('harness_agents')}; primary agent for H1/H2/H4 = `{primary}`")
+    pf = meta.get("judge_preflight") or {}
+    L.append(f"- Judge preflight (well-formed YES/NO): {'pass' if pf.get('ok') else 'FAIL/missing'}; probe accuracy {pf.get('probes_correct')}: {json.dumps(pf.get('probes'))}")
     L.append(f"- Gate policy: `{meta.get('policy_version')}`; class-4 side-effecting re-fires = BLOCK (flagged default, not warn)")
     L.append(f"- Cost: local Ollama, $0 API spend. Wall-clock: {meta.get('wall_clock_s')} s total\n")
 

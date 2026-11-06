@@ -46,3 +46,24 @@ Scenario L5 plants an untrusted *state claim* that is not instruction-like. The 
 allows class-4 reads with a provenance label, so the gate is expected **not** to stop L5.
 This case was included on purpose to bound what lineage gating can catch. It is not removed
 from the Latent ASR.
+
+## Deviations (recorded 2026-11-06, before any pilot result was analysed)
+
+The first pilot attempt (`runs/pilot-v01-20261106-ABORTED-ctx4096/`) was stopped during its
+first benchmark pass. Two serving/scorer configuration faults were found (details in that
+run's `ABORTED.md`). Fixes:
+
+1. **Agent context window.** Agent `ollama/qwen3:4b-instruct` is replaced by
+   `ollama/qwen3-4b-instruct-32k`: the same weights with `num_ctx 32768`, created by an
+   Ollama Modelfile (`FROM qwen3:4b-instruct` / `PARAMETER num_ctx 32768`). The harness
+   uses it too, so both parts run the same model configuration.
+2. **Judge model.** `ollama/qwen3:8b` returns empty completions under the benchmark's
+   `max_tokens=8` judge call. That would score every LLM-judged check NO. The judge is
+   replaced by `ollama/mistral-nemo-12b-16k` (`FROM mistral-nemo:12b`, `num_ctx 16384`).
+   It is non-thinking and from a different model family than the agent, so the agent
+   does not judge itself. It answered 3/3 yes/no probes correctly in a first check. In the pilot's
+   preflight (a reworded third probe) it answered 2/3 correctly; the preflight aborts only if
+   the judge output is not a well-formed YES/NO, and its probe accuracy is reported in REPORT.md.
+
+Unchanged: hypotheses, operational definitions, case selection, gate policy
+(`carryovergate-policy-v0.1`), task set, rounds, vote count (3), temperature 0.
