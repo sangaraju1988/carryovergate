@@ -11,6 +11,26 @@ import sys
 from pathlib import Path
 
 
+def _install_attempt_timeout(rd, seconds: int) -> None:
+    """Add attempt_timeout to every get_model call (agent via run_defense, judge via
+    llm_check, which imports get_model from inspect_ai.model at call time). Changes
+    request retry behaviour only, never sampling parameters."""
+    import inspect_ai.model as im
+    from inspect_ai.model import GenerateConfig
+
+    orig = im.get_model
+    if getattr(orig, "_carryovergate_timeout", False):
+        return
+
+    def get_model(*args, config=None, **kwargs):
+        cfg = (config or GenerateConfig()).merge(GenerateConfig(attempt_timeout=seconds))
+        return orig(*args, config=cfg, **kwargs)
+
+    get_model._carryovergate_timeout = True
+    im.get_model = get_model
+    rd.get_model = get_model
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--condition", choices=["off", "on"], required=True)
@@ -23,6 +43,9 @@ def main():
     ap.add_argument("--no-injection", action="store_true")
     ap.add_argument("--time-limit", type=int, default=540)
     ap.add_argument("--env", default=None, help="only this environment")
+    ap.add_argument("--attempt-timeout", type=int, default=180,
+                    help="seconds per model request attempt before inspect_ai retries it "
+                         "(transport only; local Ollama requests otherwise stalled ~15 min)")
     a = ap.parse_args()
 
     if a.base_defense in ("camel_scoped", "progent", "progent_fullschema"):
@@ -32,6 +55,8 @@ def main():
     os.environ["LLM_CHECK_MODEL"] = a.judge_model
 
     from prompt_injection_benchmark.scripts import run_defense as rd  # noqa: E402
+
+    _install_attempt_timeout(rd, a.attempt_timeout)
 
     if a.condition == "on":
         from eval.gate_defense import install

@@ -24,6 +24,7 @@ CAVEATS = [
     "Base defense = `none` only. The gate is wired to compose with the benchmark's DefenseEvalSolver defenses (spotlight, sandwich, trust_hierarchy[_env], drift_*) but none were run alongside it in this pilot, so H3 is not tested.",
     "Dependency pins needed to run the benchmark's pinned inspect_ai/mcp on this machine: openai>=2,<3 and pydantic>=2.12,<2.13 (newer versions crash at import/connect).",
     "Model serving: agent = qwen3:4b-instruct weights with num_ctx 32768 (Ollama default 4096 overflowed); judge = mistral-nemo:12b with num_ctx 16384 (qwen3:8b returned empty judge output at max_tokens=8). See PREREGISTRATION.md Deviations and runs/pilot-v01-20261106-ABORTED-ctx4096/.",
+    "Benchmark model requests use inspect_ai attempt_timeout=180s (then retry). Added mid-run after the first gate-off pass stalled ~15 min per hung request against local Ollama; samples already scored were kept (benchmark --resume), the interrupted sample re-ran. Transport only: sampling parameters unchanged.",
     "Synthetic harness memory is fixed after planting (agents have no memory-write tool in v0.1). Tasks are synthetic and fictional.",
 ]
 
@@ -107,6 +108,17 @@ def main():
         "caveats": CAVEATS,
         "steps": [],
     }
+    prev = run / "run.json"
+    if prev.exists():  # resuming the same run: keep its history
+        old = json.loads(prev.read_text())
+        meta["started_at"] = old.get("started_at", meta["started_at"])
+        meta["steps"] = old.get("steps", [])
+        meta["resumes"] = old.get("resumes", []) + [{
+            "at": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "skip_harness": a.skip_harness, "skip_bench": a.skip_bench,
+            "carryovergate_commit": meta["carryovergate_commit"]}]
+        if "judge_preflight" in old:
+            meta["judge_preflight_first"] = old["judge_preflight"]
     (run / "run.json").write_text(json.dumps(meta, indent=1))
     t0 = time.time()
     py = sys.executable

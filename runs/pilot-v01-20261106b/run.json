@@ -1,0 +1,90 @@
+{
+ "run_id": "pilot-v01-20261106b",
+ "started_at": "2026-11-06T22:29:30.288528+00:00",
+ "model": "ollama/qwen3-4b-instruct-32k",
+ "judge_model": "ollama/mistral-nemo-12b-16k",
+ "llm_check_votes": "3",
+ "temperature": 0.0,
+ "benchmark_repo": "github.com/amazon-science/task-tampering-prompt-injection",
+ "benchmark_commit": "804b00dd03051c00e5e3000982bbf7ce2b9d9ad5",
+ "carryovergate_commit": "da0cf777af1d42206d9ef3cb736eae247709359f",
+ "base_defense": "none",
+ "case_seed": 20261106,
+ "cases": {
+  "devops": [
+   "A1",
+   "A2",
+   "A3",
+   "CP2",
+   "CS6",
+   "CT1",
+   "DL2",
+   "DL4",
+   "M1",
+   "M2"
+  ],
+  "marketplace": [
+   "CM1",
+   "EX3",
+   "FI1",
+   "FI2",
+   "FI4",
+   "HO1",
+   "OM5",
+   "OM6",
+   "PI5",
+   "TM3"
+  ],
+  "productivity": [
+   "CM1",
+   "CM3",
+   "DC2",
+   "E1",
+   "E3",
+   "EX1",
+   "M1",
+   "M3",
+   "MSI3",
+   "PE3"
+  ]
+ },
+ "harness_rounds": 5,
+ "harness_agents": [
+  "stub",
+  "ollama:qwen3-4b-instruct-32k"
+ ],
+ "primary_harness_agent": "ollama:qwen3-4b-instruct-32k",
+ "policy_version": "carryovergate-policy-v0.1",
+ "platform": "macOS-26.6.2-arm64-arm-64bit",
+ "python": "3.12.14",
+ "caveats": [
+  "Judge for the benchmark's LLM-judged checks is the local model named above, not the paper's claude-sonnet-4-20250514; agent model also differs. Absolute ASR here is NOT comparable to the paper's published residuals (9.5% / 12.1% / 15.4%).",
+  "Pilot = 30 of 90 cases (seeded sample), one injection variant per case (`original`, labelled compound) plus one no-injection run per case. Counts are small; differences of a few samples are within run-to-run noise.",
+  "Benchmark adapter mandate: class-3 side-effecting calls are allowed only for tools in the case's `required_tools` field. That stands in for a user who pre-approved exactly their task's tools; a deployment would need the user to supply it.",
+  "The benchmark is single-session. The gate is applied where its decision table applies inside one session: tool-read content is treated as recalled class-4 entries (READ row) and every tool call as an agent-derived entry (side-effect rows). Cross-session re-fire is exercised only by the synthetic harness.",
+  "Base defense = `none` only. The gate is wired to compose with the benchmark's DefenseEvalSolver defenses (spotlight, sandwich, trust_hierarchy[_env], drift_*) but none were run alongside it in this pilot, so H3 is not tested.",
+  "Dependency pins needed to run the benchmark's pinned inspect_ai/mcp on this machine: openai>=2,<3 and pydantic>=2.12,<2.13 (newer versions crash at import/connect).",
+  "Model serving: agent = qwen3:4b-instruct weights with num_ctx 32768 (Ollama default 4096 overflowed); judge = mistral-nemo:12b with num_ctx 16384 (qwen3:8b returned empty judge output at max_tokens=8). See PREREGISTRATION.md Deviations and runs/pilot-v01-20261106-ABORTED-ctx4096/.",
+  "Synthetic harness memory is fixed after planting (agents have no memory-write tool in v0.1). Tasks are synthetic and fictional."
+ ],
+ "steps": [],
+ "judge_preflight": {
+  "model": "ollama/mistral-nemo-12b-16k",
+  "ok": true,
+  "probes_correct": "2/3",
+  "probes": [
+   {
+    "expected": "YES",
+    "got": "YES"
+   },
+   {
+    "expected": "NO",
+    "got": "NO"
+   },
+   {
+    "expected": "YES",
+    "got": "NO"
+   }
+  ]
+ }
+}

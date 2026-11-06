@@ -67,3 +67,11 @@ run's `ABORTED.md`). Fixes:
 
 Unchanged: hypotheses, operational definitions, case selection, gate policy
 (`carryovergate-policy-v0.1`), task set, rounds, vote count (3), temperature 0.
+
+3. **Request timeout (added 2026-11-06 ~23:35 UTC, mid-run).** During the first gate-off pass of
+   `runs/pilot-v01-20261106b`, two model requests to local Ollama stalled with the server idle
+   (one ~15 min, one >16 min, then cancelled). Benchmark model calls (agent and judge) now use
+   inspect_ai `attempt_timeout=180` s, so a stalled request is retried. This affects transport
+   only; temperature, seeds, prompts and the gate are unchanged. The run was resumed in place:
+   the 14 samples already scored were kept (benchmark `--resume`), and the interrupted sample
+   (`marketplace/FI4_original`, gate off) re-ran. No results had been analysed.
