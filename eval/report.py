@@ -308,6 +308,17 @@ def write_report(run: Path):
         if b["unscored"]:
             L.append(f"- Unscored samples (kept in logs): `{json.dumps(b['unscored'])[:1500]}`")
         L.append("")
+    if meta.get("known_bugs"):
+        L.append("## Known bugs\n")
+        for kb in meta["known_bugs"]:
+            L.append(f"### {kb['id']} — {kb['component']}\n")
+            L.append(f"- Status: {kb['status']}")
+            L.append(f"- What: {kb['description']}")
+            L.append(f"- Instances in this run ({len(kb['instances_in_this_run'])}):")
+            for i in kb["instances_in_this_run"]:
+                L.append(f"  - {i}")
+            L.append(f"- Outcome effect: **{kb['outcome_effect']}**")
+            L.append(f"- Found: {kb['found']}\n")
     L.append("## Caveats that bound these numbers\n")
     for c in meta.get("caveats", []):
         L.append(f"- {c}")

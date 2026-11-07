@@ -97,10 +97,16 @@ class LineageStore:
     # ---- re-fire time -----------------------------------------------------
     def verify_chain(self, entry_id: str, _seen: Optional[set] = None) -> Optional[str]:
         """Return None if the chain is intact, else a reason string."""
-        seen = _seen if _seen is not None else set()
-        if entry_id in seen:
+        # `_seen` is kept for call compatibility but unused: the walk tracks the
+        # current recursion path (cycle detection) separately from nodes already
+        # verified (a shared ancestor reached from another branch is not a cycle).
+        return self._verify(entry_id, path=set(), verified=set())
+
+    def _verify(self, entry_id: str, path: set, verified: set) -> Optional[str]:
+        if entry_id in path:
             return f"cycle at {entry_id}"
-        seen.add(entry_id)
+        if entry_id in verified:
+            return None
         e = self.entries.get(entry_id)
         if e is None:
             return f"missing entry {entry_id}"
@@ -112,10 +118,13 @@ class LineageStore:
             parent_hashes.append(pe.record.derivation_hash)
         if derivation_hash(e.content, tuple(parent_hashes)) != e.record.derivation_hash:
             return f"hash mismatch on {entry_id}"
+        path.add(entry_id)
         for p in e.record.parent_links:
-            why = self.verify_chain(p, seen)
+            why = self._verify(p, path, verified)
             if why:
                 return why
+        path.discard(entry_id)
+        verified.add(entry_id)
         return None
 
     def recheck_authority(self, entry_id: str) -> Authority:
