@@ -5,3 +5,12 @@ __pycache__/
 runs/*/harness_state/
 pib_results/
 .DS_Store
+# kept local, not published:
+# raw inspect logs embed Task-Tampering benchmark data (CC BY-NC 4.0)
+runs/*/inspect/
+# private planning docs and unsent outreach drafts
+docs/carryover-gate-build-spec-*.md
+docs/claude-code-prompt-*.md
+docs/outreach/
+# full console logs that embed benchmark request bodies
+runs/*/logs/local-full/
