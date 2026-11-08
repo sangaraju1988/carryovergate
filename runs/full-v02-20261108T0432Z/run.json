@@ -203,6 +203,22 @@
    "newly_scored": 90,
    "s_per_new_sample": 578.6,
    "at": "2026-11-08T22:24:58.111390+00:00"
+  },
+  {
+   "step": "A_on_clean",
+   "part": "A",
+   "condition": "on",
+   "base_defense": "none",
+   "injected": false,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 5200.1,
+   "newly_scored": 90,
+   "s_per_new_sample": 57.8,
+   "at": "2026-11-08T23:51:41.555746+00:00"
   }
  ],
  "unit_tests": {
@@ -233,6 +249,12 @@
    "label": "pass A_off_clean (90/90 scored)",
    "commit": "0bbbe3583649faa87683731f2859c38508fea1a1",
    "at": "2026-11-08T07:57:00.931971+00:00",
+   "pushed": true
+  },
+  {
+   "label": "pass A_on_injected (90/90 scored)",
+   "commit": "7961704a15983650573537dbc0442ae092bfeaf1",
+   "at": "2026-11-08T22:24:58.174154+00:00",
    "pushed": true
   }
  ],
@@ -290,6 +312,10 @@
   {
    "step": "A_on_injected",
    "s_per_sample": 578.6
+  },
+  {
+   "step": "A_on_clean",
+   "s_per_sample": 57.8
   }
  ]
 }
