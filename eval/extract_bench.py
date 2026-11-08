@@ -27,19 +27,20 @@ def rows_for(inspect_root: Path) -> List[dict]:
     failed: Dict[tuple, int] = {}
     for f in sorted(inspect_root.glob("gate_*/defense_evaluation/evals/*/*/*/*.eval")):
         cond = f.parts[-7].replace("gate_", "")
+        base_defense = f.parts[-4]
         env_label = f.parts[-2]
         injected = not env_label.endswith("_no_injection")
         for s in read_eval(f):
             if s.get("_bad_zip"):
                 continue
-            key = (cond, env_label, s["id"])
+            key = (cond, base_defense, env_label, s["id"])
             ps = (s.get("scores") or {}).get("ProgrammaticScorer")
             if not ps:
                 failed[key] = failed.get(key, 0) + 1
                 if key not in rows:
-                    rows[key] = _row(cond, env_label, injected, s, None)
+                    rows[key] = _row(cond, env_label, injected, s, None, base_defense)
                 continue
-            rows[key] = _row(cond, env_label, injected, s, ps.get("metadata") or {})
+            rows[key] = _row(cond, env_label, injected, s, ps.get("metadata") or {}, base_defense)
     out = []
     for key, r in sorted(rows.items()):
         r["failed_attempts"] = failed.get(key, 0)
@@ -74,13 +75,20 @@ def _label_leaves(glog: List[dict], snippets: List[str]) -> List[dict]:
     return out
 
 
-def _row(cond, env_label, injected, s, sm):
+def _redact_error(msg: str) -> str:
+    """Error text is cut at 'Request:' so an embedded request dump (which carries
+    benchmark case data, CC BY-NC 4.0) never reaches progress.jsonl."""
+    return msg.split("Request:")[0][:500]
+
+
+def _row(cond, env_label, injected, s, sm, base_defense="none"):
     md = s.get("metadata") or {}
     glog = _label_leaves(md.get("carryovergate_log") or [], _injection_snippets(md) if injected else [])
     err = s.get("error")
     return {
         "source": "task_tampering",
         "condition": cond,
+        "base_defense": base_defense,
         "environment": md.get("environment", env_label.replace("_no_injection", "")),
         "case_id": md.get("case_id"),
         "sample_id": s["id"],
@@ -94,7 +102,7 @@ def _row(cond, env_label, injected, s, sm):
         "attack_partial": (sm or {}).get("attack_partial") if injected else None,
         "injection_read": (sm or {}).get("injection_read"),
         "scoring_error": (sm or {}).get("scoring_error"),
-        "error": (err or {}).get("message", "")[:500] if err else None,
+        "error": _redact_error((err or {}).get("message", "")) if err else None,
         "total_time_s": s.get("total_time"),
         "working_time_s": s.get("working_time"),
         "n_actions": len(md.get("actions_log") or []),
