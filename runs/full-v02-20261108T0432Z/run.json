@@ -171,6 +171,22 @@
    "newly_scored": 90,
    "s_per_new_sample": 64.1,
    "at": "2026-11-08T06:23:20.637472+00:00"
+  },
+  {
+   "step": "A_off_clean",
+   "part": "A",
+   "condition": "off",
+   "base_defense": "none",
+   "injected": false,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 5618.2,
+   "newly_scored": 90,
+   "s_per_new_sample": 62.4,
+   "at": "2026-11-08T07:57:00.890375+00:00"
   }
  ],
  "unit_tests": {
@@ -189,6 +205,12 @@
    "label": "harness re-run (fixed gate)",
    "commit": "3b3e06da1a2f39c5bb34a35220dbd9c8b996eb3e",
    "at": "2026-11-08T04:47:05.553882+00:00",
+   "pushed": true
+  },
+  {
+   "label": "pass A_off_injected (90/90 scored)",
+   "commit": "5f3578e4be510604f342f2c9b99614e502a02820",
+   "at": "2026-11-08T06:23:20.678736+00:00",
    "pushed": true
   }
  ],
@@ -238,6 +260,10 @@
   {
    "step": "A_off_injected",
    "s_per_sample": 64.1
+  },
+  {
+   "step": "A_off_clean",
+   "s_per_sample": 62.4
   }
  ]
 }
