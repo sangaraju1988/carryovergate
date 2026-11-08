@@ -113,6 +113,34 @@ Everything runs locally with open-weight models through Ollama. There are no pai
 24 GB Mac, the four benchmark passes took about 2.2 hours of wall-clock time and the harness
 took about 18 minutes (see `run.json` and the report).
 
+## Running the full run (v0.2)
+
+`eval/run_full.py` drives the v0.2 run preregistered in
+[`PREREGISTRATION-v0.2.md`](PREREGISTRATION-v0.2.md). It has three parts, run in this order:
+1. A harness re-run on the fixed gate.
+2. **Part A**: all 90 cases with base defense `none`, gate off vs on, injected and no-injection
+   (360 samples).
+3. **Part B**: the H3 composition. Each of `spotlight`, `sandwich`, `trust_hierarchy` and
+   `drift_full_guided` runs alone and with the gate, injected only (720 samples).
+
+```bash
+.venv/bin/python -m eval.run_full --benchmark-repo ../task-tampering-prompt-injection
+# resume or re-run single parts of an existing run:
+.venv/bin/python -m eval.run_full --benchmark-repo ../task-tampering-prompt-injection \
+    --run-id full-v02-<ts> --skip-harness [--skip-bench] [--skip-h3] [--h3-extension] [--no-push]
+```
+
+- `--skip-harness`, `--skip-bench` and `--skip-h3` skip the harness, Part A and Part B.
+- `--h3-extension` adds the exploratory set: `trust_hierarchy_env`, `drift_isolation` and
+  `drift_full`. It's never part of the H3 verdict.
+- Every pass is resumable. The benchmark's own `--resume` skips samples that are already scored.
+- The runner refuses to start if the unit tests fail, or if `gate/`, `harness/` or `tasks/`
+  changed since the v0.2 preregistration was committed.
+- After each pass it rebuilds `progress.jsonl`, updates `run.json`, and commits and pushes both
+  (`--no-push` keeps them local).
+- After each part it regenerates `REPORT.md`.
+- The judge preflight runs once per invocation, before its first benchmark pass.
+
 To run the adapter on its own, use `.venv/bin/python -m eval.bench_run --condition on --model
 ollama/qwen3-4b-instruct-32k --judge-model ollama/mistral-nemo-12b-16k --out <dir>
 [--base-defense spotlight]`. With the gate off, it is the benchmark's runner, unmodified. With
