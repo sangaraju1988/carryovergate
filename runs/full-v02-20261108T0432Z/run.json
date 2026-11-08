@@ -155,6 +155,22 @@
    "error_rows": 0,
    "seconds": 868.7,
    "at": "2026-11-08T04:47:05.484309+00:00"
+  },
+  {
+   "step": "A_off_injected",
+   "part": "A",
+   "condition": "off",
+   "base_defense": "none",
+   "injected": true,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 5766.1,
+   "newly_scored": 90,
+   "s_per_new_sample": 64.1,
+   "at": "2026-11-08T06:23:20.637472+00:00"
   }
  ],
  "unit_tests": {
@@ -167,5 +183,61 @@
   "at": "2026-11-08T04:32:36.779945+00:00"
  },
  "prereg_v02_commit": "14fcba49801785443c576967527962581189c375",
- "harness_complete": true
+ "harness_complete": true,
+ "checkpoints": [
+  {
+   "label": "harness re-run (fixed gate)",
+   "commit": "3b3e06da1a2f39c5bb34a35220dbd9c8b996eb3e",
+   "at": "2026-11-08T04:47:05.553882+00:00",
+   "pushed": true
+  }
+ ],
+ "judge_preflights": [
+  {
+   "model": "ollama/mistral-nemo-12b-16k",
+   "ok": true,
+   "probes_correct": "2/3",
+   "probes": [
+    {
+     "expected": "YES",
+     "got": "YES"
+    },
+    {
+     "expected": "NO",
+     "got": "NO"
+    },
+    {
+     "expected": "YES",
+     "got": "NO"
+    }
+   ],
+   "at": "2026-11-08T04:47:14.290161+00:00"
+  }
+ ],
+ "judge_preflight": {
+  "model": "ollama/mistral-nemo-12b-16k",
+  "ok": true,
+  "probes_correct": "2/3",
+  "probes": [
+   {
+    "expected": "YES",
+    "got": "YES"
+   },
+   {
+    "expected": "NO",
+    "got": "NO"
+   },
+   {
+    "expected": "YES",
+    "got": "NO"
+   }
+  ],
+  "at": "2026-11-08T04:47:14.290161+00:00"
+ },
+ "observed_rates": [
+  {
+   "step": "A_off_injected",
+   "s_per_sample": 64.1
+  }
+ ]
 }
