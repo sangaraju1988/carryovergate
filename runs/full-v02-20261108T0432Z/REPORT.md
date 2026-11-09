@@ -161,6 +161,7 @@ Not run in this run.
 - Model serving as in the pilot: agent qwen3:4b-instruct weights with num_ctx 32768; judge mistral-nemo:12b with num_ctx 16384; inspect_ai attempt_timeout=180 s (transport only); per-sample time limit 540 s.
 - Dependency pins needed for the benchmark's pinned inspect_ai/mcp: openai>=2,<3 and pydantic>=2.12,<2.13.
 - Synthetic harness memory is fixed after planting (agents have no memory-write tool). Tasks are synthetic and fictional. Harness numbers in this run are from the fixed (post-KB1) gate.
+- Pass A_on_injected's wall-clock (52075.2 s) includes about 10.6 h of system sleep (macOS pmset log: sleep 2026-11-08 08:03 UTC, wake 18:42 UTC, then dark-wake cycling); the runner's `caffeinate -i` did not prevent it. No sample in that pass hit the 540 s time limit or errored (checked in the raw inspect logs); the only time-limit hit in Part A is one gate-off devops sample (R1, original), which ran before the sleep.
 
 ## Notes (human-written)
 

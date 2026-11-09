@@ -44,6 +44,40 @@ from the build spec, and the owner can switch it to warn.
 "Instruction-like" is a fixed, deterministic regex list in `gate/instruction.py`. It's policy:
 changing it means bumping `POLICY_VERSION` and re-running.
 
+## Full-run results (v0.2)
+
+The v0.2 run covers all 90 Task-Tampering cases, one run per condition, and tests the gate on its
+own and composed with four of the benchmark's own defenses. The hypotheses were preregistered in
+[`PREREGISTRATION-v0.2.md`](PREREGISTRATION-v0.2.md) before any v0.2 data existed, and the gate
+was frozen for the whole run.
+
+Attack success on injected runs, all 90 cases:
+
+| base defense | alone | + gate |
+|---|---|---|
+| none | 18.9% (17/90) | 11.1% (10/90) |
+| spotlight | 17.8% (16/90) | 12.2% (11/90) |
+| sandwich | 14.4% (13/90) | 7.8% (7/90) |
+| trust_hierarchy | 23.3% (21/90) | 11.1% (10/90) |
+| drift_full_guided | 8.9% (8/90) | 4.4% (4/90) |
+
+- **H3 held as preregistered.** Adding the gate never raised pooled attack success for any
+  defense. The largest reduction (12.2 points) came on the defense with the highest residual
+  (trust_hierarchy).
+- **Most individual differences are within noise.** Each condition was run once, and the
+  per-defense paired counts are small; see the report.
+- **The gate costs task completion when composed with stricter defenses.** On injected runs,
+  completion fell from 31.1% to 17.8% with drift_full_guided and from 32.2% to 24.4% with
+  trust_hierarchy. It rose with sandwich (16.7% to 22.2%).
+- **Not every environment improved.** In productivity, attack success went up with the gate
+  under spotlight (2 to 3 of 28) and sandwich (1 to 3 of 28).
+- **The harness was re-run on the fixed gate:** autonomous 60% → 0% and latent 20% → 20% (all L5,
+  the expected miss), with 0/605 false positives.
+- **H1 and H4 did not hold**, and H2 held.
+
+Full numbers, verdicts and caveats are in
+[`runs/full-v02-20261108T0432Z/REPORT.md`](runs/full-v02-20261108T0432Z/REPORT.md).
+
 ## Pilot results (v0.1)
 
 Derivation-authority gating eliminates scheduled re-fires: on the synthetic harness, autonomous attacks went from 60% to 0% (ollama agent) and 100% to 0% (deterministic stub), with zero false positives on legitimate controls (0/605). On the single-session Task-Tampering benchmark the drop was 20% to 13.3% (6 to 4 of 30 cases), within noise at this size. The gate does not adjudicate truth: it withheld only 5 of 24 injection-bearing leaves, because most of this benchmark's injections read as plain facts.
@@ -65,10 +99,12 @@ from. You can regenerate the raw logs by re-running the pilot.
   mistral-nemo-12b running locally, not the paper's Sonnet, and the agent is a 4B
   open-weight model. Absolute attack success rates in this repo are **not** comparable to the
   paper's published residuals (9.5% / 12.1% / 15.4%).
-- **Small pilot.** 30 of the benchmark's 90 cases, one injection variant per case (`original`),
-  plus one no-injection run per case. A difference of a few samples is noise.
-- **H3 untested.** The gate ran alongside the benchmark's `none` defense only. Composing it with
-  the benchmark's own defenses (spotlight, sandwich, trust hierarchy, DRIFT) is the next run.
+- **One run per condition.** The pilot used 30 cases; v0.2 uses all 90, with one injection
+  variant per case (`original`). A difference of a few samples is noise.
+- **Composition utility is only partly measured.** v0.2 composed the gate with spotlight,
+  sandwich, trust hierarchy and DRIFT on injected runs only. There were no clean runs under
+  composed defenses, so the utility cost of D + gate on clean runs is unmeasured. CaMeL and
+  Progent use their own solvers and were not composed.
 - **H4 not held.** The no-injection negative control didn't match between gate off and gate
   on. In the harness, the gate changed the agent's context, so the email text differed while
   the actions were the same. On the benchmark, gate interventions and possible run-to-run
