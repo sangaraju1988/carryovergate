@@ -219,6 +219,22 @@
    "newly_scored": 90,
    "s_per_new_sample": 57.8,
    "at": "2026-11-08T23:51:41.555746+00:00"
+  },
+  {
+   "step": "B_spotlight_off",
+   "part": "B",
+   "condition": "off",
+   "base_defense": "spotlight",
+   "injected": true,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 9740.9,
+   "newly_scored": 90,
+   "s_per_new_sample": 108.2,
+   "at": "2026-11-09T02:34:07.183911+00:00"
   }
  ],
  "unit_tests": {
@@ -261,6 +277,12 @@
    "label": "pass A_on_clean (90/90 scored)",
    "commit": "f2bec67954ec4de8fa0349890f0cf97529ad9c0c",
    "at": "2026-11-08T23:51:41.605115+00:00",
+   "pushed": true
+  },
+  {
+   "label": "Part A complete; REPORT.md regenerated",
+   "commit": "a89e8405c113bdb6a036d33b1c725b733913b014",
+   "at": "2026-11-08T23:51:43.873346+00:00",
    "pushed": true
   }
  ],
@@ -322,6 +344,10 @@
   {
    "step": "A_on_clean",
    "s_per_sample": 57.8
+  },
+  {
+   "step": "B_spotlight_off",
+   "s_per_sample": 108.2
   }
  ],
  "finished_at": "2026-11-08T23:51:43.790260+00:00",
