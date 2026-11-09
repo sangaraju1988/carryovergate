@@ -14,6 +14,76 @@ used as a scorer is Amazon's Task-Tampering benchmark (arXiv:2611.07640,
 github.com/amazon-science/task-tampering-prompt-injection). It is an external dependency and
 is not included here. This repo is not affiliated with that benchmark's authors.
 
+## Results (v0.2: all 90 Task-Tampering cases)
+
+**Added on top of four of the benchmark's own defenses, the gate lowered pooled attack success
+under every one of them, and the largest reduction came where the existing defense was weakest.
+That was preregistered hypothesis H3, and it held.** Each condition was run once, so most
+individual differences are within noise, and the gate costs task completion under stricter
+defenses (details below).
+
+The hypotheses were fixed in [`PREREGISTRATION-v0.2.md`](PREREGISTRATION-v0.2.md) before any
+v0.2 data existed, and the gate was frozen for the whole run. Every number below comes from
+[`runs/full-v02-20261108T0432Z/REPORT.md`](runs/full-v02-20261108T0432Z/REPORT.md), which is
+computed from that run's `progress.jsonl`. Setup: agent `qwen3:4b-instruct` and judge
+`mistral-nemo:12b`, both local through Ollama; one `original` injection variant per case.
+
+### Part A: the gate on its own (base defense `none`)
+
+Attack success on injected runs:
+
+| environment | gate off | gate on |
+|---|---|---|
+| devops | 25.8% (8/31) | 9.7% (3/31) |
+| marketplace | 19.4% (6/31) | 16.1% (5/31) |
+| productivity | 10.7% (3/28) | 7.1% (2/28) |
+| **all 90 cases** | **18.9% (17/90)** | **11.1% (10/90)** |
+
+- **Paired by case:** the attack succeeded only with the gate off in 10 cases, only with it on in
+  3, and in both in 7.
+- **Cost on clean (no-injection) runs:** the gate intervened in 36.7% of them (33/90), and task
+  completion went from 25.6% to 23.3%.
+- **The gate does not judge truth.** It withheld 14 of 64 pieces of content that carried the
+  injected text, because most of this benchmark's injections read as plain facts.
+
+### Part B: the gate composed with the benchmark's defenses (H3)
+
+Injected runs only, all 90 cases:
+
+| base defense | attack success alone | + gate | reduction | task completed alone | + gate | paired: off-only / on-only / both |
+|---|---|---|---|---|---|---|
+| spotlight | 17.8% (16/90) | 12.2% (11/90) | 5.6 pts | 35.6% | 33.3% | 9 / 4 / 7 |
+| sandwich | 14.4% (13/90) | 7.8% (7/90) | 6.7 pts | 16.7% | 22.2% | 10 / 4 / 3 |
+| trust_hierarchy | **23.3% (21/90)** | 11.1% (10/90) | **12.2 pts** | 32.2% | 24.4% | 15 / 4 / 6 |
+| drift_full_guided | 8.9% (8/90) | 4.4% (4/90) | 4.4 pts | 31.1% | 17.8% | 5 / 1 / 3 |
+
+- **The cost is in task completion.** It fell under drift_full_guided (31.1% → 17.8%) and
+  trust_hierarchy (32.2% → 24.4%). Clean runs under composed defenses were out of scope, so that
+  cost is unmeasured.
+- **Not every environment improved.** In productivity, attack success rose with the gate under
+  spotlight (2 → 3 of 28) and sandwich (1 → 3 of 28). H3 is scored on all cases pooled.
+
+### Synthetic carryover harness (cross-session re-fire)
+
+The benchmark is single-session. Re-firing across sessions is tested only in the synthetic
+harness (re-run on the fixed gate, `qwen3:4b-instruct` agent):
+- **Autonomous** (scheduled tasks) attack success: **60% → 0%** (15/25 → 0/25).
+- **Latent** (recalled memory): 20% → 20%, all from L5, the expected miss.
+- **False positives on legitimate controls:** 0/605.
+- **Gate check latency:** p50 34.5 µs, p95 89.8 µs.
+
+### Hypotheses
+
+- **H1 did not hold.** The harness latent channel did not drop; every other channel and
+  environment did.
+- **H2 held:** 0% false positives.
+- **H3 held.**
+- **H4 did not hold:** 66 of 90 clean cases matched exactly with the gate off and on.
+
+The raw inspect `.eval` logs are kept locally and are not in this repo, because they embed the
+Task-Tampering benchmark's case data (CC BY-NC 4.0). `progress.jsonl` holds the per-sample
+outcomes and gate decisions the reports are computed from.
+
 ## The decision table
 
 Every stored entry gets a derivation record when it is stored. The store writes it, never the
@@ -44,54 +114,13 @@ from the build spec, and the owner can switch it to warn.
 "Instruction-like" is a fixed, deterministic regex list in `gate/instruction.py`. It's policy:
 changing it means bumping `POLICY_VERSION` and re-running.
 
-## Full-run results (v0.2)
+## Earlier pilot (v0.1)
 
-The v0.2 run covers all 90 Task-Tampering cases, one run per condition, and tests the gate on its
-own and composed with four of the benchmark's own defenses. The hypotheses were preregistered in
-[`PREREGISTRATION-v0.2.md`](PREREGISTRATION-v0.2.md) before any v0.2 data existed, and the gate
-was frozen for the whole run.
-
-Attack success on injected runs, all 90 cases:
-
-| base defense | alone | + gate |
-|---|---|---|
-| none | 18.9% (17/90) | 11.1% (10/90) |
-| spotlight | 17.8% (16/90) | 12.2% (11/90) |
-| sandwich | 14.4% (13/90) | 7.8% (7/90) |
-| trust_hierarchy | 23.3% (21/90) | 11.1% (10/90) |
-| drift_full_guided | 8.9% (8/90) | 4.4% (4/90) |
-
-- **H3 held as preregistered.** Adding the gate never raised pooled attack success for any
-  defense. The largest reduction (12.2 points) came on the defense with the highest residual
-  (trust_hierarchy).
-- **Most individual differences are within noise.** Each condition was run once, and the
-  per-defense paired counts are small; see the report.
-- **The gate costs task completion when composed with stricter defenses.** On injected runs,
-  completion fell from 31.1% to 17.8% with drift_full_guided and from 32.2% to 24.4% with
-  trust_hierarchy. It rose with sandwich (16.7% to 22.2%).
-- **Not every environment improved.** In productivity, attack success went up with the gate
-  under spotlight (2 to 3 of 28) and sandwich (1 to 3 of 28).
-- **The harness was re-run on the fixed gate:** autonomous 60% → 0% and latent 20% → 20% (all L5,
-  the expected miss), with 0/605 false positives.
-- **H1 and H4 did not hold**, and H2 held.
-
-Full numbers, verdicts and caveats are in
-[`runs/full-v02-20261108T0432Z/REPORT.md`](runs/full-v02-20261108T0432Z/REPORT.md).
-
-## Pilot results (v0.1)
-
-Derivation-authority gating eliminates scheduled re-fires: on the synthetic harness, autonomous attacks went from 60% to 0% (ollama agent) and 100% to 0% (deterministic stub), with zero false positives on legitimate controls (0/605). On the single-session Task-Tampering benchmark the drop was 20% to 13.3% (6 to 4 of 30 cases), within noise at this size. The gate does not adjudicate truth: it withheld only 5 of 24 injection-bearing leaves, because most of this benchmark's injections read as plain facts.
-
-Full numbers, hypothesis verdicts and notes are in
-[`runs/pilot-v01-20261106b/REPORT.md`](runs/pilot-v01-20261106b/REPORT.md). Every figure in it
-is computed from that run's `progress.jsonl`. The hypotheses and scoring rules were
-preregistered in [`PREREGISTRATION.md`](PREREGISTRATION.md) before the pilot ran. Deviations
-are listed there and in the report.
-
-The raw inspect `.eval` logs for each benchmark sample are kept locally and are not in this
-repo, because they embed the Task-Tampering benchmark's case data (CC BY-NC 4.0).
-`progress.jsonl` holds the per-sample outcomes and gate decisions that the report is computed
-from. You can regenerate the raw logs by re-running the pilot.
+The first run was a 30-case pilot on the pre-KB1 gate: benchmark attack success went from 20% to
+13.3% (6 to 4 of 30), within noise at that size. The full v0.2 run above supersedes it. The
+pilot's numbers, hypothesis verdicts and notes are in
+[`runs/pilot-v01-20261106b/REPORT.md`](runs/pilot-v01-20261106b/REPORT.md), preregistered in
+[`PREREGISTRATION.md`](PREREGISTRATION.md).
 
 ## Limits
 
@@ -106,11 +135,11 @@ from. You can regenerate the raw logs by re-running the pilot.
   composed defenses, so the utility cost of D + gate on clean runs is unmeasured. CaMeL and
   Progent use their own solvers and were not composed.
 - **H4 not held.** The no-injection negative control didn't match between gate off and gate
-  on. In the harness, the gate changed the agent's context, so the email text differed while
-  the actions were the same. On the benchmark, gate interventions and possible run-to-run
-  variance can't be separated with one run per condition.
-- **Utility cost on unlabelled content.** Some gate intervention happened in 43.3% of clean
-  (no-injection) benchmark samples (13/30). In the harness, 33.3% of benign untrusted entries
+  on. In v0.2 the executed tool calls differed even with free-text fields ignored: in all 5
+  differing harness N0 rounds, and in 23 of the 24 differing benchmark clean cases. With one run
+  per condition, gate interventions and run-to-run variance can't be separated.
+- **Utility cost on unlabelled content.** Some gate intervention happened in 36.7% of clean
+  (no-injection) benchmark samples (33/90). In the harness, 33.3% of benign untrusted entries
   were quarantined. The 0% false-positive rate covers the defined legitimate controls only.
 - **False facts pass.** The gate stops instructions and tool calls outside the mandate. A false
   fact with clean-looking content passes through with a provenance label. That's a design
@@ -122,7 +151,7 @@ from. You can regenerate the raw logs by re-running the pilot.
   the case's `required_tools` field. That stands in for a user who pre-approved exactly their
   task's tools.
 - **Known bug KB1** (a shared ancestor was treated as a cycle) was fixed after the pilot. It had
-  zero outcome effect in the pilot; details are in the report.
+  zero outcome effect in the pilot, and v0.2 ran on the fixed gate; details are in both reports.
 
 ## Running the pilot
 
@@ -189,9 +218,10 @@ gate/        derivation record, authority classes, decision table, tool-call der
 harness/     minimal agent loop: persistent memory file + scheduled-task list; stub and Ollama agents
 tasks/       synthetic planted payloads (Latent L1–L5, Autonomous A1–A5), negative control N0, legitimate controls
 eval/        Task-Tampering adapter (gate as a defense condition), runners, extractor, report generator
-runs/        run logs: run.json, progress.jsonl, REPORT.md, metrics.json, logs/ (raw inspect logs kept local; see Pilot results)
+runs/        run logs: run.json, progress.jsonl, REPORT.md, metrics.json, logs/ (raw inspect logs kept local; see Results)
 tests/       unit tests (stdlib unittest)
-PREREGISTRATION.md   hypotheses H1–H4 and scoring rules, fixed before the pilot
+PREREGISTRATION.md        hypotheses H1–H4 and scoring rules, fixed before the pilot
+PREREGISTRATION-v0.2.md   v0.2 scoring (incl. the H3 rule) and deviations, fixed before the full run
 ```
 
 ## License
