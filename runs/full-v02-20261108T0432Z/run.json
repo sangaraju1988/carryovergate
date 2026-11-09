@@ -299,6 +299,22 @@
    "newly_scored": 90,
    "s_per_new_sample": 109.4,
    "at": "2026-11-09T10:47:53.207378+00:00"
+  },
+  {
+   "step": "B_trust_hierarchy_on",
+   "part": "B",
+   "condition": "on",
+   "base_defense": "trust_hierarchy",
+   "injected": true,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 10096.9,
+   "newly_scored": 90,
+   "s_per_new_sample": 112.2,
+   "at": "2026-11-09T13:36:14.058678+00:00"
   }
  ],
  "unit_tests": {
@@ -371,6 +387,12 @@
    "label": "pass B_sandwich_on (90/90 scored)",
    "commit": "29f61b1a42554f214f67b1f2909134207aec1c91",
    "at": "2026-11-09T08:03:42.727495+00:00",
+   "pushed": true
+  },
+  {
+   "label": "pass B_trust_hierarchy_off (90/90 scored)",
+   "commit": "2fb9a6001268defdd7d088346b3be785a4f0ed48",
+   "at": "2026-11-09T10:47:53.271191+00:00",
    "pushed": true
   }
  ],
@@ -452,6 +474,10 @@
   {
    "step": "B_trust_hierarchy_off",
    "s_per_sample": 109.4
+  },
+  {
+   "step": "B_trust_hierarchy_on",
+   "s_per_sample": 112.2
   }
  ],
  "finished_at": "2026-11-08T23:51:43.790260+00:00",
