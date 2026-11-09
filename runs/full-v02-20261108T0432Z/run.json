@@ -331,6 +331,22 @@
    "newly_scored": 90,
    "s_per_new_sample": 171.2,
    "at": "2026-11-09T17:53:06.725385+00:00"
+  },
+  {
+   "step": "B_drift_full_guided_on",
+   "part": "B",
+   "condition": "on",
+   "base_defense": "drift_full_guided",
+   "injected": true,
+   "exit": 0,
+   "scored": 90,
+   "rows": 90,
+   "expected": 90,
+   "complete": true,
+   "seconds": 16014.5,
+   "newly_scored": 90,
+   "s_per_new_sample": 177.9,
+   "at": "2026-11-09T22:20:06.088291+00:00"
   }
  ],
  "unit_tests": {
@@ -415,6 +431,12 @@
    "label": "pass B_trust_hierarchy_on (90/90 scored)",
    "commit": "b7899dfcadcf3f6c53e8cecea1246b8d2cf64d79",
    "at": "2026-11-09T13:36:14.132207+00:00",
+   "pushed": true
+  },
+  {
+   "label": "pass B_drift_full_guided_off (90/90 scored)",
+   "commit": "34a5061678b5a2fd5e6136b5de6d000b84deb507",
+   "at": "2026-11-09T17:53:06.809384+00:00",
    "pushed": true
   }
  ],
@@ -504,6 +526,10 @@
   {
    "step": "B_drift_full_guided_off",
    "s_per_sample": 171.2
+  },
+  {
+   "step": "B_drift_full_guided_on",
+   "s_per_sample": 177.9
   }
  ],
  "finished_at": "2026-11-08T23:51:43.790260+00:00",
