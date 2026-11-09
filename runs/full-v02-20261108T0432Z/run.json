@@ -438,6 +438,12 @@
    "commit": "34a5061678b5a2fd5e6136b5de6d000b84deb507",
    "at": "2026-11-09T17:53:06.809384+00:00",
    "pushed": true
+  },
+  {
+   "label": "pass B_drift_full_guided_on (90/90 scored)",
+   "commit": "d14a1985fc412194236a206cefb014e1088c38fc",
+   "at": "2026-11-09T22:20:06.171044+00:00",
+   "pushed": true
   }
  ],
  "judge_preflights": [
@@ -532,6 +538,6 @@
    "s_per_sample": 177.9
   }
  ],
- "finished_at": "2026-11-08T23:51:43.790260+00:00",
- "wall_clock_s": 69528.3
+ "finished_at": "2026-11-09T22:20:08.270052+00:00",
+ "wall_clock_s": 150401.3
 }
