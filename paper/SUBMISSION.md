@@ -1,7 +1,7 @@
 # Submission package: "Carryovergate: Derivation-Authority Gating at Re-fire Time for LLM Agents"
 
 ## Files
-- `dist/carryovergate-arxiv.tar.gz`: arXiv source upload. Tested: extracts and compiles with pdflatex alone, using the shipped `main.bbl`. 6 pages.
+- `dist/carryovergate-arxiv.tar.gz`: arXiv source upload, flat (no subfolders), 8 files. Tested: extracts and compiles with pdflatex alone, using the shipped `main.bbl`. 6 pages.
 - `dist/Sangaraju-carryovergate.pdf`: the compiled PDF, for the AGENT'27 HotCRP upload.
 - `arxiv_abstract.txt`: plain-text abstract for the arXiv form (1,505 characters; the limit is 1,920).
 
@@ -10,6 +10,7 @@
 python3 scripts/build_bib.py > refs.bib      # every reference pulled from arXiv / Crossref
 python scripts/make_figures.py               # needs matplotlib; reads runs/full-v02-20261108T0432Z/metrics.json
 pdflatex main && bibtex main && pdflatex main && pdflatex main
+sh scripts/make_arxiv.sh                     # flat arXiv package in dist/ (no subfolders)
 ```
 
 ## arXiv form
