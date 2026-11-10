@@ -7,6 +7,10 @@ runs, carryovergate checks its derivation chain: does it trace back to the user?
 doesn't, the entry is blocked or quarantined instead of executed. The gate is pure Python
 (stdlib only), deterministic, and makes no model calls.
 
+Paper: [`paper/main.pdf`](paper/main.pdf), "Carryovergate: Derivation-Authority Gating at Re-fire
+Time for LLM Agents". Its LaTeX source, bibliography and the scripts that build every table and
+figure from this repo's run data are in [`paper/`](paper/).
+
 Background: the carryover attack is measured in "After the Attacker Leaves" (arXiv:2610.28425,
 CarryoverBench). The lineage machinery comes from "Lineage-Aware Memory Governance" (IEEE
 Access, Vol. 14, 2026), applied here at re-fire time instead of at retrieval. The benchmark

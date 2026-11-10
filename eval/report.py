@@ -596,7 +596,7 @@ def write_report_v02(run: Path, rows: List[dict], meta: dict, quiet: bool = Fals
     L.append("## Caveats that bound these numbers\n")
     for c in meta.get("caveats", []):
         L.append(f"- {c}")
-    L.append("\n## Notes (human-written)\n\n_Fill in after checking each claim against the logs. Do not smooth over failures._\n")
+    L.append("")
     (run / "REPORT.md").write_text("\n".join(L))
     (run / "metrics.json").write_text(json.dumps(
         {"harness": h, "benchmark_part_a": b, "h3_primary": h3, "h3_extension": hx,

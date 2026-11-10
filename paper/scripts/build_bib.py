@@ -1,0 +1,136 @@
+"""Build refs.bib from authoritative metadata (arXiv API and Crossref), so that every
+title, author list and DOI is copied from the registry rather than typed by hand.
+
+Run: python3 scripts/build_bib.py > refs.bib
+"""
+import json
+import re
+import sys
+import time
+import urllib.request
+
+ARXIV = {
+    # key: arXiv id
+    "xu2026carryover": "2610.28425",
+    "zhang2026tasktampering": "2611.07640",
+    "debenedetti2025camel": "2503.18813",
+    "costa2025fides": "2505.23643",
+    "shi2025progent": "2504.11703",
+    "hines2024spotlighting": "2403.14720",
+    "wallace2024instruction": "2404.13208",
+    "debenedetti2024agentdojo": "2406.13352",
+    "chen2024agentpoison": "2407.12784",
+    "packer2023memgpt": "2310.08560",
+    "chhikara2025mem0": "2504.19413",
+    "yang2025qwen3": "2505.09388",
+    "li2025drift": "2506.12104",
+}
+
+CROSSREF = {
+    "sangaraju2026lineage": "10.1109/ACCESS.2026.3730363",
+    "greshake2023indirect": "10.1145/3605764.3623985",
+    "denning1976lattice": "10.1145/360051.360056",
+    "sabelfeld2003language": "10.1109/JSAC.2002.806121",
+    "nosek2018preregistration": "10.1073/pnas.1708274114",
+    "mcnemar1947": "10.1007/BF02295996",
+    "zhan2024injecagent": "10.18653/v1/2024.findings-acl.624",
+    "merkle1988signature": "10.1007/3-540-48184-2_32",
+}
+
+LATEX_ESC = {"&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#"}
+
+
+def tex(s: str) -> str:
+    s = " ".join(s.split())
+    for k, v in LATEX_ESC.items():
+        s = s.replace(k, v)
+    return s
+
+
+def protect_title(t: str) -> str:
+    # keep acronyms / capitalised words as typed by the registry
+    words = []
+    for w in t.split(" "):
+        core = re.sub(r"[^A-Za-z0-9]", "", w)
+        if (len(core) > 1 and sum(c.isupper() for c in core) > 1) or re.search(r"\d", core) or core in ("LLM", "AI"):
+            words.append("{" + w + "}")
+        else:
+            words.append(w)
+    return " ".join(words)
+
+
+def doi_note(doi: str) -> str:
+    # IEEEtran.bst ignores the doi field; print it as a clickable note instead
+    return r"doi: \href{https://doi.org/" + doi + "}{\\nolinkurl{" + doi + "}}"
+
+
+def get(url: str) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": "carryovergate-bib/1.0"})
+    return urllib.request.urlopen(req, timeout=60).read()
+
+
+def arxiv_entries():
+    x = get("http://export.arxiv.org/api/query?max_results=50&id_list=" + ",".join(ARXIV.values())).decode()
+    by_id = {}
+    for e in x.split("<entry>")[1:]:
+        aid = re.search(r"<id>http://arxiv.org/abs/([^<v]+)v\d+</id>", e).group(1)
+        title = " ".join(re.search(r"<title>(.*?)</title>", e, re.S).group(1).split())
+        authors = re.findall(r"<name>(.*?)</name>", e)
+        year = re.search(r"<published>(\d{4})", e).group(1)
+        prim = re.search(r'arxiv:primary_category[^>]*term="([^"]+)"', e)
+        by_id[aid] = (title, authors, year, prim.group(1) if prim else "cs.CR")
+    out = []
+    for key, aid in ARXIV.items():
+        title, authors, year, prim = by_id[aid]
+        out.append(
+            f"@misc{{{key},\n"
+            f"  author = {{{tex(' and '.join(authors))}}},\n"
+            f"  title = {{{{{tex(title)}}}}},\n"
+            f"  year = {{{year}}},\n"
+            f"  howpublished = {{arXiv:{aid} [{prim}]}},\n"
+            f"  doi = {{10.48550/arXiv.{aid}}},\n"
+            f"  note = {{{doi_note('10.48550/arXiv.' + aid)}}}\n}}\n"
+        )
+    return out
+
+
+def crossref_entries():
+    out = []
+    for key, doi in CROSSREF.items():
+        m = json.loads(get("https://api.crossref.org/works/" + doi))["message"]
+        authors = " and ".join(
+            tex((a.get("given", "") + " " + a.get("family", "")).strip()) for a in m.get("author", [])
+        )
+        title = "{" + tex(m["title"][0]) + "}"  # keep the registry's capitalisation
+        year = m["issued"]["date-parts"][0][0]
+        cont = tex((m.get("container-title") or [""])[0])
+        typ = m.get("type")
+        fields = [f"  author = {{{authors}}}", f"  title = {{{title}}}", f"  year = {{{year}}}"]
+        if typ == "journal-article":
+            kind = "article"
+            fields.append(f"  journal = {{{cont}}}")
+            if m.get("volume"):
+                fields.append(f"  volume = {{{m['volume']}}}")
+            if m.get("issue"):
+                fields.append(f"  number = {{{m['issue']}}}")
+        else:
+            kind = "inproceedings"
+            fields.append(f"  booktitle = {{{cont}}}")
+            if m.get("publisher"):
+                fields.append(f"  publisher = {{{tex(m['publisher'])}}}")
+        if m.get("page"):
+            fields.append(f"  pages = {{{m['page'].replace('-', '--')}}}")
+        fields.append(f"  doi = {{{doi}}}")
+        fields.append(f"  note = {{{doi_note(doi)}}}")
+        out.append(f"@{kind}{{{key},\n" + ",\n".join(fields) + "\n}\n")
+        time.sleep(0.5)
+    return out
+
+
+if __name__ == "__main__":
+    sys.stdout.write("% Generated by scripts/build_bib.py from the arXiv API and Crossref. Do not hand-edit.\n\n")
+    # IEEE style: lists of more than six authors are shortened to the first author et al.
+    sys.stdout.write('@IEEEtranBSTCTL{IEEEexample:BSTcontrol,\n  CTLuse_forced_etal = "yes",\n'
+                     '  CTLmax_names_forced_etal = "6",\n  CTLnames_show_etal = "1"\n}\n\n')
+    for e in arxiv_entries() + crossref_entries():
+        sys.stdout.write(e + "\n")
