@@ -1,7 +1,7 @@
 # Submission package: "Carryovergate: Derivation-Authority Gating at Re-fire Time for LLM Agents"
 
 ## Files
-- `dist/carryovergate-arxiv.tar.gz`: arXiv source upload, flat (no subfolders), 8 files. Tested: extracts and compiles with pdflatex alone, using the shipped `main.bbl`. 6 pages.
+- `dist/carryovergate-arxiv.tar.gz`: arXiv source upload, flat (no subfolders), 6 files; table rows are inlined so arXiv's scanner sees every file as used. Tested: extracts and compiles with pdflatex alone, using the shipped `main.bbl`. 6 pages.
 - `dist/Sangaraju-carryovergate.pdf`: the compiled PDF, for the AGENT'27 HotCRP upload.
 - `arxiv_abstract.txt`: plain-text abstract for the arXiv form (1,505 characters; the limit is 1,920).
 
