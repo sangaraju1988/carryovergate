@@ -110,7 +110,8 @@ studies what happens when such content persists into memory and schedules.
 
 \textbf{Prompt-level defenses.} Spotlighting marks untrusted content so the model can tell it
 apart from instructions~\cite{hines2024spotlighting}. The instruction hierarchy trains models to
-rank instructions by source privilege~\cite{wallace2024instruction}. Sandwich-style prompting
+rank instructions by source privilege~\cite{wallace2024instruction}. The benchmark's
+trust-hierarchy defense is a system-prompt approximation of that idea, not the fine-tuning method. Sandwich-style prompting
 repeats the user task after tool output. These defenses change what the model sees; they do not
 enforce anything outside the model.
 
@@ -124,8 +125,7 @@ provenance to entries that outlive the session, checks a hash chain so tampering
 caught, and runs at the moment a stored entry is about to act again.
 
 \textbf{Memory systems.} MemGPT manages context as a memory hierarchy~\cite{packer2023memgpt};
-Mem0 offers a production memory layer~\cite{chhikara2025mem0}. Neither records derivation
-authority for stored entries. Our earlier work gated retrieval in enterprise agents by
+Mem0 offers a production memory layer~\cite{chhikara2025mem0}. Neither gates recall or re-fire on derivation authority. Our earlier work gated retrieval in enterprise agents by
 column-level lineage~\cite{sangaraju2026lineage}; this paper applies the same lineage machinery
 at re-fire time.
 
@@ -160,7 +160,7 @@ parents' hashes. From the record the store assigns one of four authority classes
 \item \emph{untrusted or unknown}: web or tool content, pasted third-party text, unknown
 imports, broken chains, and agent output with any class-4 parent.
 \end{enumerate}
-Class 3 is where laundering usually happens. An agent that summarizes a web page into memory
+Class 3 is where laundering happens in our harness. An agent that summarizes a web page into memory
 produces an entry that looks like the agent's own note. Here its parent is class 4, so the note
 is class 4 too.
 
@@ -420,7 +420,7 @@ so the verdict stands, but these are real increases.
 \textbf{H1 does not hold.} Attack success was lower with the gate in every benchmark environment
 and in the autonomous channel, but not in the latent channel, which stayed at 5/25 because of
 L5. \textbf{H2 holds}: 0 false positives in 605 checks. \textbf{H3 holds}, with the
-cautions above. \textbf{H4 does not hold.} No harness N0 round matched exactly, and \hFourBench{}
+cautions above. \textbf{H4 does not hold.} No harness N0 round matched exactly with the Qwen agent, and \hFourBench{}
 clean benchmark cases matched. Where they differed, the executed tool calls themselves differed
 even with free-text arguments ignored (all 5 harness rounds and 23 of 24 benchmark cases), so the
 difference is not only wording. With one run per condition we cannot separate the gate's effect
